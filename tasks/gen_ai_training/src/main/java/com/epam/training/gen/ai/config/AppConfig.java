@@ -13,6 +13,7 @@ import com.microsoft.semantickernel.plugin.KernelPlugin;
 import com.microsoft.semantickernel.plugin.KernelPluginFactory;
 import com.microsoft.semantickernel.services.chatcompletion.ChatCompletionService;
 import com.microsoft.semantickernel.services.chatcompletion.ChatHistory;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,8 +21,10 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Configuration
+@RequiredArgsConstructor
 public class AppConfig {
 
     @Value("${client-openai-key}")
@@ -29,6 +32,11 @@ public class AppConfig {
 
     @Value("${client-openai-endpoint}")
     private String endpoint;
+
+    @Value("${client-openai-deployment-name}")
+    private String deploymentOrModelName;
+
+    private final DeploymentProperties deploymentProperties;
 
     @Bean
     public OpenAIAsyncClient openAIAsyncClient() {
@@ -39,8 +47,7 @@ public class AppConfig {
     }
 
     @Bean
-    public ChatCompletionService chatCompletionService(@Value("${client-openai-deployment-name}") String deploymentOrModelName,
-                                                       OpenAIAsyncClient openAIAsyncClient) {
+    public ChatCompletionService chatCompletionService(OpenAIAsyncClient openAIAsyncClient) {
         return OpenAIChatCompletion.builder()
                 .withModelId(deploymentOrModelName)
                 .withOpenAIAsyncClient(openAIAsyncClient)
@@ -67,11 +74,9 @@ public class AppConfig {
     }
 
     @Bean
-    public InvocationContext invocationContext() {
+    public InvocationContext invocationContext(Map<String, PromptExecutionSettings> promptExecutionsSettingsMap) {
         return InvocationContext.builder()
-                .withPromptExecutionSettings(PromptExecutionSettings.builder()
-                        .withTemperature(1.0)
-                        .build())
+                .withPromptExecutionSettings(promptExecutionsSettingsMap.get(deploymentOrModelName))
                 .build();
     }
 
@@ -79,5 +84,14 @@ public class AppConfig {
     @Scope(scopeName = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
     public ChatHistory chatHistory() {
         return new ChatHistory();
+    }
+
+    @Bean
+    public Map<String, PromptExecutionSettings> promptExecutionsSettingsMap() {
+        return deploymentProperties.getDeployments().entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getValue,
+                        e -> PromptExecutionSettings.builder()
+                                .withTemperature(1.0)
+                                .build()));
     }
 }
