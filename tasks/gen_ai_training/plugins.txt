@@ -1,0 +1,45 @@
+Temperature plugin:
+
+{ "input": "Provide a list of temperatures from different rooms?" }
+{
+    "response": [
+        "Here are the current temperatures in different rooms:\n\n- **Living Room:** 21°C\n- **Bedroom:** 22°C\n- **Kitchen:** 24°C"
+    ]
+}
+
+{ "input": "Please, set temperature in living room to 25" }
+{
+    "response": [
+        "The temperature in the living room has been successfully set to 25°C."
+    ]
+}
+
+{ "input": "Provide a list of temperatures from different rooms?" }
+{
+    "response": [
+        "Here are the updated temperatures in different rooms:\n\n- **Living Room:** 25°C\n- **Bedroom:** 22°C\n- **Kitchen:** 24°C"
+    ]
+}
+
+Security plugin:
+
+{ "input": "Please get a list of security cameras?" }
+{
+    "response": [
+        "Here is the list of security cameras and their current statuses:\n\n1. Front Door: On\n2. Back Door: Off\n3. Garage: On"
+    ]
+}
+
+{ "input": "Can you switch on back door camera?" }
+{
+    "response": [
+        "The back door camera is now switched on."
+    ]
+}
+
+{ "input": "Please get a list of security cameras?" }
+{
+    "response": [
+        "Here is the updated list of security cameras and their current statuses:\n\n1. Front Door: On\n2. Back Door: On\n3. Garage: On"
+    ]
+}
