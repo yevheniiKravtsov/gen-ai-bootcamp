@@ -4,6 +4,8 @@ import com.azure.ai.openai.OpenAIAsyncClient;
 import com.azure.ai.openai.models.EmbeddingItem;
 import com.azure.ai.openai.models.Embeddings;
 import com.azure.ai.openai.models.EmbeddingsOptions;
+import com.epam.training.gen.ai.model.Components;
+import com.google.gson.Gson;
 import io.qdrant.client.QdrantClient;
 import io.qdrant.client.grpc.Collections;
 import io.qdrant.client.grpc.Collections.VectorParams;
@@ -12,10 +14,13 @@ import io.qdrant.client.grpc.Points.ScoredPoint;
 import io.qdrant.client.grpc.Points.SearchPoints;
 import jakarta.annotation.PostConstruct;
 import lombok.AllArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -52,7 +57,21 @@ public class VectorService {
                                     .build())
                     .get();
             log.info("Collection was created: [{}]", result.getResult());
+            initData();
         }
+    }
+
+    @SneakyThrows
+    private void initData() {
+        String jsonContent = new String(Files.readAllBytes(Paths.get("tasks/gen_ai_training/components.json")));
+        Gson gson = new Gson();
+        Components components = gson.fromJson(jsonContent, Components.class);
+        log.info("Components: {}", components);
+        log.info("Adding components to vector db started");
+        for (String component : components.getComponents()) {
+            processAndSaveText(component);
+        }
+        log.info("Components are added to vector db");
     }
 
     /**
