@@ -3,16 +3,10 @@ package com.epam.training.gen.ai.config;
 import com.azure.ai.openai.OpenAIAsyncClient;
 import com.azure.ai.openai.OpenAIClientBuilder;
 import com.azure.core.credential.AzureKeyCredential;
-import com.epam.training.gen.ai.plugin.SecurityPlugin;
-import com.epam.training.gen.ai.plugin.SimplePlugin;
-import com.epam.training.gen.ai.plugin.TemperaturePlugin;
-import com.microsoft.semantickernel.Kernel;
 import com.microsoft.semantickernel.aiservices.openai.chatcompletion.OpenAIChatCompletion;
 import com.microsoft.semantickernel.orchestration.InvocationContext;
 import com.microsoft.semantickernel.orchestration.PromptExecutionSettings;
 import com.microsoft.semantickernel.orchestration.ToolCallBehavior;
-import com.microsoft.semantickernel.plugin.KernelPlugin;
-import com.microsoft.semantickernel.plugin.KernelPluginFactory;
 import com.microsoft.semantickernel.services.chatcompletion.ChatCompletionService;
 import com.microsoft.semantickernel.services.chatcompletion.ChatHistory;
 import io.qdrant.client.QdrantClient;
@@ -31,9 +25,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AppConfig {
 
-    private static final String SIMPLE_PLUGIN = "SimplePlugin";
-    private static final String SECURITY_PLUGIN = "SecurityPlugin";
-    private static final String TEMPERATURE_PLUGIN = "TemperaturePlugin";
     @Value("${client-openai-key}")
     private String apiKey;
 
@@ -58,36 +49,6 @@ public class AppConfig {
         return OpenAIChatCompletion.builder()
                 .withModelId(deploymentOrModelName)
                 .withOpenAIAsyncClient(openAIAsyncClient)
-                .build();
-    }
-
-    /**
-     * Creates a {@link KernelPlugin} bean using a simple plugin.
-     *
-     * @return an instance of {@link KernelPlugin}
-     */
-    public KernelPlugin createSimplePlugin() {
-        return KernelPluginFactory.createFromObject(
-                new SimplePlugin(), SIMPLE_PLUGIN);
-    }
-
-    public KernelPlugin createSecurityPlugin() {
-        return KernelPluginFactory.createFromObject(
-                new SecurityPlugin(), SECURITY_PLUGIN);
-    }
-
-    public KernelPlugin createTemperaturePlugin() {
-        return KernelPluginFactory.createFromObject(
-                new TemperaturePlugin(), TEMPERATURE_PLUGIN);
-    }
-
-    @Bean
-    public Kernel kernel(ChatCompletionService chatCompletionService) {
-        return Kernel.builder()
-                .withAIService(ChatCompletionService.class, chatCompletionService)
-                .withPlugin(createSimplePlugin())
-                .withPlugin(createSecurityPlugin())
-                .withPlugin(createTemperaturePlugin())
                 .build();
     }
 
