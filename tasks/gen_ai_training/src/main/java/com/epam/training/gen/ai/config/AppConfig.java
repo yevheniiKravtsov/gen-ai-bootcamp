@@ -9,13 +9,14 @@ import com.epam.training.gen.ai.plugin.TemperaturePlugin;
 import com.microsoft.semantickernel.Kernel;
 import com.microsoft.semantickernel.aiservices.openai.chatcompletion.OpenAIChatCompletion;
 import com.microsoft.semantickernel.orchestration.InvocationContext;
-import com.microsoft.semantickernel.orchestration.InvocationReturnMode;
 import com.microsoft.semantickernel.orchestration.PromptExecutionSettings;
 import com.microsoft.semantickernel.orchestration.ToolCallBehavior;
 import com.microsoft.semantickernel.plugin.KernelPlugin;
 import com.microsoft.semantickernel.plugin.KernelPluginFactory;
 import com.microsoft.semantickernel.services.chatcompletion.ChatCompletionService;
 import com.microsoft.semantickernel.services.chatcompletion.ChatHistory;
+import io.qdrant.client.QdrantClient;
+import io.qdrant.client.QdrantGrpcClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -111,5 +112,11 @@ public class AppConfig {
                         e -> PromptExecutionSettings.builder()
                                 .withTemperature(1.0)
                                 .build()));
+    }
+
+    @Bean
+    public QdrantClient qdrantClient() {
+        return new QdrantClient(QdrantGrpcClient.newBuilder(
+                "localhost", 6334, false).build());
     }
 }
